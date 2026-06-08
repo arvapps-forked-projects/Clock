@@ -31,7 +31,6 @@
     <string name="no_timers_found">Δεν βρέθηκαν χρονόμετρα</string>
     <string name="add_timer">Προσθήκη χρονόμετρου</string>
     <string name="upcoming_alarm">Επερχόμενη αφύπνιση</string>
-    <string name="early_alarm_dismissal">Πρόωρη απόρριψη αφύπνισης</string>
     <string name="timers_notification_msg">Τα χρονόμετρα σε λειτουργία</string>
     <string name="timer_single_notification_label_msg">Το χρονόμετρο για %s σε λειτουργία</string>
     <string name="new_timer">Νέο Χρονόμετρο</string>
@@ -47,4 +46,10 @@
     <string name="increase_volume_gradually">Σταδιακή αύξηση έντασης</string>
     <string name="faq_1_title">Πώς μπορώ να αλλάξω την ταξινόμηση γύρων στην καρτέλα χρονόμετρου;</string>
     <string name="faq_1_text">Απλά κάντε κλικ σε οποιαδήποτε από τις στήλες, ώστε οι γύροι να ταξινομηθούν κατά τη δεδομένη στήλη. Με πρόσθετα κλικ μπορείτε να κάνετε εναλλαγή μεταξύ αύξουσας και φθίνουσας ταξινόμησης.</string>
+    <string name="not_scheduled">Δεν έχει προγραμματιστεί</string>
+    <string name="alarm_timed_out">Το χρονικό όριο του ξυπνητηριού έληξε</string>
+    <string name="settings_import_data">Εισαγωγή ξυπνητηριών και χρονομέτρων</string>
+    <string name="settings_export_data">Εξαγωγή ξυπνητηριών και χρονομέτρων</string>
+    <string name="sort_by_timer_duration">Διάρκεια χρονομέτρου</string>
+    <string name="missed_alarm">Η αφύπνιση παραλήφθηκε</string>
 </resources>

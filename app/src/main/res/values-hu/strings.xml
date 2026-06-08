@@ -9,8 +9,8 @@
     <string name="stopwatch">Stopperóra</string>
     <string name="start_stopwatch">Stopperóra indítása</string>
     <string name="lap">Kör</string>
-    <string name="stopwatch_stopped">A stopper leállt</string>
-    <string name="timer_stopped">Az időzítő leállt</string>
+    <string name="stopwatch_stopped">A stopper leállítva</string>
+    <string name="timer_stopped">Az időzítő leállítva</string>
     <string name="max_reminder_duration">Értesítés leghosszabb időtartama</string>
     <string name="time_expired">Az idő lejárt</string>
     <string name="clock_and_date">Idő és dátum</string>
@@ -46,5 +46,11 @@
     <string name="select_timer_to_dismiss">Válassza ki az elvetendő időzítőt</string>
     <string name="select_alarm_to_dismiss">Válassza ki az elvetendő ébresztést</string>
     <string name="alarm_created">Ébresztés létrehozva</string>
-    <string name="early_alarm_dismissal">Korai ébresztéselvetés</string>
+    <string name="settings_import_data">Ébresztések és időzítők importálása</string>
+    <string name="settings_export_data">Ébresztések és időzítők exportálása</string>
+    <string name="sort_by_timer_duration">Időzítés időtartama</string>
+    <string name="alarm_timed_out">Ébresztő időkorlátja lejárt</string>
+    <string name="not_scheduled">Nincs ütemezve</string>
+    <string name="missed_alarm">Kihagyott ébresztés</string>
+    <string name="replaced_by_another_alarm">Másik ébresztés helyettesíti</string>
 </resources>

@@ -1,8 +1,11 @@
 package org.fossify.clock.models
 
 import androidx.annotation.Keep
+import org.fossify.clock.helpers.TODAY_BIT
+import org.fossify.clock.helpers.TOMORROW_BIT
 
 @Keep
+@kotlinx.serialization.Serializable
 data class Alarm(
     var id: Int,
     var timeInMinutes: Int,
@@ -13,7 +16,13 @@ data class Alarm(
     var soundUri: String,
     var label: String,
     var oneShot: Boolean = false,
-)
+) {
+    fun isRecurring() = days > 0
+
+    fun isToday() = days == TODAY_BIT
+
+    fun isTomorrow() = days == TOMORROW_BIT
+}
 
 @Keep
 data class ObfuscatedAlarm(

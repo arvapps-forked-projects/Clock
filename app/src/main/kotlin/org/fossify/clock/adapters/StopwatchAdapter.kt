@@ -3,22 +3,33 @@ package org.fossify.clock.adapters
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import org.fossify.clock.activities.SimpleActivity
 import org.fossify.clock.databinding.ItemLapBinding
 import org.fossify.clock.extensions.formatStopwatchTime
 import org.fossify.clock.helpers.SORT_BY_LAP
 import org.fossify.clock.helpers.SORT_BY_LAP_TIME
 import org.fossify.clock.helpers.SORT_BY_TOTAL_TIME
+import org.fossify.clock.extensions.isLive
 import org.fossify.clock.models.Lap
-import org.fossify.commons.adapters.MyRecyclerViewAdapter
+import org.fossify.commons.adapters.MyRecyclerViewListAdapter
 import org.fossify.commons.views.MyRecyclerView
 
-class StopwatchAdapter(activity: SimpleActivity, var laps: ArrayList<Lap>, recyclerView: MyRecyclerView, itemClick: (Any) -> Unit) :
-    MyRecyclerViewAdapter(activity, recyclerView, itemClick) {
-    private var lastLapTimeView: TextView? = null
-    private var lastTotalTimeView: TextView? = null
-    private var lastLapId = 0
+class StopwatchAdapter(
+    activity: SimpleActivity,
+    recyclerView: MyRecyclerView,
+    private val onItemClick: (Any) -> Unit,
+) : MyRecyclerViewListAdapter<Lap>(
+    activity = activity,
+    recyclerView = recyclerView,
+    diffUtil = LapDiffCallback(),
+    itemClick = {}
+) {
+
+    init {
+        setHasStableIds(true)
+        recyclerView.itemAnimator = null
+    }
 
     override fun getActionMenuId() = 0
 
@@ -26,70 +37,58 @@ class StopwatchAdapter(activity: SimpleActivity, var laps: ArrayList<Lap>, recyc
 
     override fun actionItemPressed(id: Int) {}
 
-    override fun getSelectableItemCount() = laps.size
+    override fun getSelectableItemCount() = currentList.size
 
     override fun getIsItemSelectable(position: Int) = false
 
-    override fun getItemSelectionKey(position: Int) = laps.getOrNull(position)?.id
+    override fun getItemSelectionKey(position: Int) = currentList.getOrNull(position)?.id
 
-    override fun getItemKeyPosition(key: Int) = laps.indexOfFirst { it.id == key }
+    override fun getItemKeyPosition(key: Int) = currentList.indexOfFirst { it.id == key }
 
     override fun onActionModeCreated() {}
 
     override fun onActionModeDestroyed() {}
 
+    override fun getItemId(position: Int): Long {
+        return getItem(position)?.id?.toLong() ?: 0L
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return createViewHolder(ItemLapBinding.inflate(layoutInflater, parent, false).root)
     }
 
-    override fun onBindViewHolder(holder: MyRecyclerViewAdapter.ViewHolder, position: Int) {
-        val lap = laps[position]
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val lap = getItem(position)
         holder.bindView(lap, false, false) { itemView, layoutPosition ->
             setupView(itemView, lap)
         }
         bindViewHolder(holder)
     }
 
-    override fun getItemCount() = laps.size
-
-    fun updateItems(newItems: ArrayList<Lap>) {
-        lastLapId = 0
-        laps = newItems.clone() as ArrayList<Lap>
-        laps.sort()
-        notifyDataSetChanged()
-        finishActMode()
-    }
-
-    fun updateLastField(lapTime: Long, totalTime: Long) {
-        lastLapTimeView?.text = lapTime.formatStopwatchTime(false)
-        lastTotalTimeView?.text = totalTime.formatStopwatchTime(false)
-    }
-
     private fun setupView(view: View, lap: Lap) {
         ItemLapBinding.bind(view).apply {
-            lapOrder.text = lap.id.toString()
+            lapOrder.text = if (lap.isLive()) currentList.size.toString() else lap.id.toString()
             lapOrder.setTextColor(textColor)
             lapOrder.setOnClickListener {
-                itemClick(SORT_BY_LAP)
+                onItemClick(SORT_BY_LAP)
             }
 
             lapLapTime.text = lap.lapTime.formatStopwatchTime(false)
             lapLapTime.setTextColor(textColor)
             lapLapTime.setOnClickListener {
-                itemClick(SORT_BY_LAP_TIME)
+                onItemClick(SORT_BY_LAP_TIME)
             }
 
             lapTotalTime.text = lap.totalTime.formatStopwatchTime(false)
             lapTotalTime.setTextColor(textColor)
             lapTotalTime.setOnClickListener {
-                itemClick(SORT_BY_TOTAL_TIME)
-            }
-
-            if (lap.id > lastLapId) {
-                lastLapTimeView = lapLapTime
-                lastTotalTimeView = lapTotalTime
-                lastLapId = lap.id
+                onItemClick(SORT_BY_TOTAL_TIME)
             }
         }
+    }
+
+    private class LapDiffCallback : DiffUtil.ItemCallback<Lap>() {
+        override fun areItemsTheSame(oldItem: Lap, newItem: Lap) = oldItem.id == newItem.id
+        override fun areContentsTheSame(oldItem: Lap, newItem: Lap) = oldItem == newItem
     }
 }

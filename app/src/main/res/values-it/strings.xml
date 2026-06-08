@@ -31,7 +31,6 @@
     <string name="no_timers_found">Nessun contaminuti trovato</string>
     <string name="add_timer">Aggiungi contaminuti</string>
     <string name="upcoming_alarm">Allarme imminente</string>
-    <string name="early_alarm_dismissal">Arresto anticipato dell\'allarme</string>
     <string name="timers_notification_msg">I contaminuti sono in funzione</string>
     <string name="timer_single_notification_label_msg">Il contaminuti per %s è in funzione</string>
     <string name="new_timer">Nuovo contaminuti</string>
@@ -48,4 +47,11 @@
     <string name="increase_volume_gradually">Incrementa il volume gradualmente</string>
     <string name="faq_1_title">Come posso cambiare l\'ordinamento dei giri nel cronometro?</string>
     <string name="faq_1_text">Premendo una volta su qualsiasi colonna, i giri verranno ordinati per tale colonna. Premendo nuovamente si potrà cambiare il tipo di ordinamento, ascendente o discendente.</string>
+    <string name="settings_import_data">Importa sveglie e timer</string>
+    <string name="settings_export_data">Esporta sveglie e timer</string>
+    <string name="sort_by_timer_duration">Durata del timer</string>
+    <string name="not_scheduled">Non in programma</string>
+    <string name="missed_alarm">Sveglia mancata</string>
+    <string name="replaced_by_another_alarm">Sostituita da un\'altra sveglia</string>
+    <string name="alarm_timed_out">Sveglia scaduta</string>
 </resources>

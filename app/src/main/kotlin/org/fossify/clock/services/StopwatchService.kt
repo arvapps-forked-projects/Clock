@@ -14,26 +14,24 @@ import androidx.core.content.ContextCompat
 import org.fossify.clock.R
 import org.fossify.clock.extensions.getFormattedDuration
 import org.fossify.clock.extensions.getOpenStopwatchTabIntent
-import org.fossify.clock.helpers.STOPWATCH_RUNNING_NOTIF_ID
+import org.fossify.clock.helpers.STOPWATCH_RUNNING_NOTIFICATION_ID
 import org.fossify.clock.helpers.Stopwatch
 import org.fossify.clock.helpers.Stopwatch.State
 import org.fossify.clock.helpers.Stopwatch.UpdateListener
+import org.fossify.commons.extensions.notificationManager
 import org.fossify.commons.extensions.showErrorToast
-import org.fossify.commons.helpers.isOreoPlus
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 
 class StopwatchService : Service() {
     private val bus = EventBus.getDefault()
-    private lateinit var notificationManager: NotificationManager
     private lateinit var notificationBuilder: NotificationCompat.Builder
     private var isStopping = false
 
     override fun onCreate() {
         super.onCreate()
         bus.register(this)
-        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationBuilder = getServiceNotificationBuilder(
             getString(R.string.app_name),
             getString(R.string.stopwatch)
@@ -46,7 +44,7 @@ class StopwatchService : Service() {
         super.onStartCommand(intent, flags, startId)
         isStopping = false
         startForeground(
-            STOPWATCH_RUNNING_NOTIF_ID,
+            STOPWATCH_RUNNING_NOTIFICATION_ID,
             notificationBuilder.build()
         )
         Stopwatch.addUpdateListener(updateListener)
@@ -72,11 +70,9 @@ class StopwatchService : Service() {
         val channelId = "simple_alarm_stopwatch"
         val label = getString(R.string.stopwatch)
         val importance = NotificationManager.IMPORTANCE_DEFAULT
-        if (isOreoPlus()) {
-            NotificationChannel(channelId, label, importance).apply {
-                setSound(null, null)
-                notificationManager.createNotificationChannel(this)
-            }
+        NotificationChannel(channelId, label, importance).apply {
+            setSound(null, null)
+            notificationManager.createNotificationChannel(this)
         }
 
         return NotificationCompat.Builder(this, channelId)
@@ -93,8 +89,9 @@ class StopwatchService : Service() {
 
     private fun updateNotification(totalTime: Long) {
         val formattedDuration = totalTime.getFormattedDuration()
-        notificationBuilder.setContentTitle(formattedDuration).setContentText(getString(R.string.stopwatch))
-        notificationManager.notify(STOPWATCH_RUNNING_NOTIF_ID, notificationBuilder.build())
+        notificationBuilder.setContentTitle(formattedDuration)
+            .setContentText(getString(R.string.stopwatch))
+        notificationManager.notify(STOPWATCH_RUNNING_NOTIFICATION_ID, notificationBuilder.build())
     }
 
     private val updateListener = object : UpdateListener {
@@ -127,7 +124,10 @@ class StopwatchService : Service() {
 fun startStopwatchService(context: Context) {
     Handler(Looper.getMainLooper()).post {
         try {
-            ContextCompat.startForegroundService(context, Intent(context, StopwatchService::class.java))
+            ContextCompat.startForegroundService(
+                context,
+                Intent(context, StopwatchService::class.java)
+            )
         } catch (e: Exception) {
             context.showErrorToast(e)
         }

@@ -30,7 +30,6 @@
     <string name="no_timers_found">Ez da tenporizadorerik aurkitu</string>
     <string name="add_timer">Gehitu tenporizadorea</string>
     <string name="upcoming_alarm">Datorren alarma</string>
-    <string name="early_alarm_dismissal">Alarmaren irteera goiztiarra</string>
     <string name="timers_notification_msg">Tenporizadoreak martxan daude</string>
     <string name="timer_single_notification_label_msg">%s-ren tenporizadorea martxan da</string>
     <string name="new_timer">Tenporizadore berria</string>
@@ -47,4 +46,11 @@
     <string name="faq_1_title">Nola alda dezaket biren ordena kronometroaren fitxan\?</string>
     <string name="faq_1_text">Sakatu zutaberen bat, birak zutabe horren arabera ordenatzeko. Gehiagotan sakatuz ordena gorakor edo beherakorrean sailka dezakezu.</string>
     <string name="clock">Erlojua</string>
+    <string name="settings_import_data">Inportatu alarma eta denboragailuak</string>
+    <string name="settings_export_data">Esportatu alarma eta denboragailuak</string>
+    <string name="sort_by_timer_duration">Tenporizadorearen iraupena</string>
+    <string name="not_scheduled">Programatu gabe</string>
+    <string name="missed_alarm">Galdutako alarma</string>
+    <string name="replaced_by_another_alarm">Beste alarma batek ordeztu du</string>
+    <string name="alarm_timed_out">Alarma iraungita</string>
 </resources>

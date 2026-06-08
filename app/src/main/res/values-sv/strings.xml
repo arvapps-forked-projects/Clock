@@ -10,7 +10,7 @@
     <string name="lap">Varv</string>
     <string name="stopwatch_stopped">Stoppuret har stoppats</string>
     <string name="timer_stopped">Timern har stoppats</string>
-    <string name="max_reminder_duration">Maximal påminnelsevaraktighet</string>
+    <string name="max_reminder_duration">Maximal påminnelselängd</string>
     <string name="time_expired">Tiden har löpt ut</string>
     <string name="clock_and_date">Klocka och datum</string>
     <string name="use_text_shadow">Använd textskugga</string>
@@ -23,14 +23,13 @@
     <string name="alarm_dismissed">Alarmet har avvisats</string>
     <string name="select_timer_to_dismiss">Välj timer att avfärda</string>
     <string name="select_alarm_to_dismiss">Välj alarm att avfärda</string>
-    <string name="alarm_created">Alarm skapat</string>
+    <string name="alarm_created">Alarmet har skapats</string>
     <string name="alarm_snoozed">Alarmet snoozar %s</string>
     <string name="no_alarms_found">Inga alarm hittades</string>
     <string name="add_alarm">Lägg till alarm</string>
     <string name="no_timers_found">Inga timers hittades</string>
     <string name="add_timer">Lägg till timer</string>
     <string name="upcoming_alarm">Kommande alarm</string>
-    <string name="early_alarm_dismissal">Tidig avstängning av alarm</string>
     <string name="timers_notification_msg">Timers är igång</string>
     <string name="timer_single_notification_label_msg">Timer för %s är igång</string>
     <string name="new_timer">Ny timer</string>
@@ -44,6 +43,14 @@
     <string name="timer_tab">Fliken Timer</string>
     <string name="show_seconds">Visa sekunder</string>
     <string name="increase_volume_gradually">Höj volymen gradvis</string>
-    <string name="faq_1_title">Hur kan jag ändra sortering av varv i fliken stoppur\?</string>
+    <string name="faq_1_title">Hur kan jag ändra sorteringen av varv på fliken Stoppur?</string>
     <string name="faq_1_text">Klicka bara på någon av kolumnerna för att sortera varven efter den aktuella kolumnen. Med ytterligare klick kan du växla mellan stigande och fallande sortering.</string>
+    <string name="timer">Timer</string>
+    <string name="settings_import_data">Importera alarm och timers</string>
+    <string name="settings_export_data">Exportera alarm och timers</string>
+    <string name="sort_by_timer_duration">Timerlängd</string>
+    <string name="not_scheduled">Inte schemalagd</string>
+    <string name="missed_alarm">Missat alarm</string>
+    <string name="replaced_by_another_alarm">Ersatt av ett annat alarm</string>
+    <string name="alarm_timed_out">Alarm gick ut</string>
 </resources>

@@ -11,15 +11,27 @@ import org.fossify.clock.adapters.AlarmsAdapter
 import org.fossify.clock.databinding.FragmentAlarmBinding
 import org.fossify.clock.dialogs.ChangeAlarmSortDialog
 import org.fossify.clock.dialogs.EditAlarmDialog
-import org.fossify.clock.extensions.*
-import org.fossify.clock.helpers.*
+import org.fossify.clock.extensions.alarmController
+import org.fossify.clock.extensions.cancelAlarmClock
+import org.fossify.clock.extensions.config
+import org.fossify.clock.extensions.createNewAlarm
+import org.fossify.clock.extensions.dbHelper
+import org.fossify.clock.extensions.firstDayOrder
+import org.fossify.clock.extensions.handleFullScreenNotificationsPermission
+import org.fossify.clock.extensions.updateWidgets
+import org.fossify.clock.helpers.DEFAULT_ALARM_MINUTES
+import org.fossify.clock.helpers.SORT_BY_ALARM_TIME
+import org.fossify.clock.helpers.SORT_BY_DATE_AND_TIME
+import org.fossify.clock.helpers.getTomorrowBit
 import org.fossify.clock.interfaces.ToggleAlarmInterface
 import org.fossify.clock.models.Alarm
 import org.fossify.clock.models.AlarmEvent
+import org.fossify.commons.extensions.beVisibleIf
 import org.fossify.commons.extensions.getProperBackgroundColor
 import org.fossify.commons.extensions.getProperTextColor
 import org.fossify.commons.extensions.toast
 import org.fossify.commons.extensions.updateTextColors
+import org.fossify.commons.helpers.SORT_BY_CUSTOM
 import org.fossify.commons.helpers.SORT_BY_DATE_CREATED
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.models.AlarmSound
@@ -33,7 +45,11 @@ class AlarmFragment : Fragment(), ToggleAlarmInterface {
 
     private lateinit var binding: FragmentAlarmBinding
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
         binding = FragmentAlarmBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -73,53 +89,79 @@ class AlarmFragment : Fragment(), ToggleAlarmInterface {
         setupAlarms()
     }
 
-    private fun setupAlarms() {
-        alarms = context?.dbHelper?.getAlarms() ?: return
+    private fun getSortedAlarms(callback: (alarms: ArrayList<Alarm>) -> Unit) {
+        val safeContext = context ?: return
+        ensureBackgroundThread {
+            var newAlarms = context?.dbHelper?.getAlarms()
+            if (newAlarms == null) {
+                activity?.runOnUiThread {
+                    callback(arrayListOf())
+                }
+                return@ensureBackgroundThread
+            }
 
-        when (requireContext().config.alarmSort) {
-            SORT_BY_ALARM_TIME -> alarms.sortBy { it.timeInMinutes }
-            SORT_BY_DATE_CREATED -> alarms.sortBy { it.id }
-            SORT_BY_DATE_AND_TIME -> alarms.sortWith(compareBy<Alarm> {
-                requireContext().firstDayOrder(it.days)
-            }.thenBy {
-                it.timeInMinutes
-            })
-        }
-        context?.getEnabledAlarms { enabledAlarms ->
-            if (enabledAlarms.isNullOrEmpty()) {
-                val removedAlarms = mutableListOf<Alarm>()
-                alarms.forEach {
-                    if (it.days == TODAY_BIT && it.isEnabled && it.timeInMinutes <= getCurrentDayMinutes()) {
-                        it.isEnabled = false
-                        ensureBackgroundThread {
-                            if (it.oneShot) {
-                                it.isEnabled = false
-                                context?.dbHelper?.deleteAlarms(arrayListOf(it))
-                                removedAlarms.add(it)
-                            } else {
-                                context?.dbHelper?.updateAlarmEnabledState(it.id, false)
+            when (safeContext.config.alarmSort) {
+                SORT_BY_ALARM_TIME -> newAlarms.sortBy { it.timeInMinutes }
+                SORT_BY_DATE_CREATED -> newAlarms.sortBy { it.id }
+                SORT_BY_DATE_AND_TIME -> newAlarms.sortWith(compareBy<Alarm> {
+                    safeContext.firstDayOrder(it.days)
+                }.thenBy {
+                    it.timeInMinutes
+                })
+
+                SORT_BY_CUSTOM -> {
+                    val customAlarmsSortOrderString = activity?.config?.alarmsCustomSorting
+                    if (customAlarmsSortOrderString == "") {
+                        newAlarms.sortBy { it.id }
+                    } else {
+                        val customAlarmsSortOrder: List<Int> =
+                            customAlarmsSortOrderString?.split(", ")?.map { it.toInt() }!!
+                        val alarmsIdValueMap = newAlarms.associateBy { it.id }
+
+                        val sortedAlarms: ArrayList<Alarm> = ArrayList()
+                        customAlarmsSortOrder.map { id ->
+                            if (alarmsIdValueMap[id] != null) {
+                                sortedAlarms.add(alarmsIdValueMap[id] as Alarm)
                             }
                         }
+
+                        newAlarms =
+                            (sortedAlarms + newAlarms.filter { it !in sortedAlarms }) as ArrayList<Alarm>
                     }
                 }
-                alarms.removeAll(removedAlarms)
+            }
+
+            activity?.runOnUiThread {
+                callback(newAlarms)
             }
         }
+    }
 
-        val currAdapter = binding.alarmsList.adapter
-        if (currAdapter == null) {
-            AlarmsAdapter(activity as SimpleActivity, alarms, this, binding.alarmsList) {
-                openEditAlarm(it as Alarm)
-            }.apply {
-                binding.alarmsList.adapter = this
+    private fun setupAlarms() {
+        getSortedAlarms { sortedAlarms ->
+            alarms = sortedAlarms
+            val safeActivity = activity as? SimpleActivity ?: return@getSortedAlarms
+            var currAdapter = binding.alarmsList.adapter as? AlarmsAdapter
+            if (currAdapter == null) {
+                currAdapter = AlarmsAdapter(
+                    activity = safeActivity,
+                    alarms = alarms,
+                    toggleAlarmInterface = this,
+                    recyclerView = binding.alarmsList
+                ) {
+                    openEditAlarm(it as Alarm)
+                }.apply {
+                    binding.alarmsList.adapter = this
+                }
+            } else {
+                currAdapter.apply {
+                    updatePrimaryColor()
+                    updateBackgroundColor(safeActivity.getProperBackgroundColor())
+                    updateTextColor(safeActivity.getProperTextColor())
+                    updateItems(alarms)
+                }
             }
-        } else {
-            (currAdapter as AlarmsAdapter).apply {
-                updatePrimaryColor()
-                updateBackgroundColor(requireContext().getProperBackgroundColor())
-                updateTextColor(requireContext().getProperTextColor())
-                updateItems(this@AlarmFragment.alarms)
-            }
+            binding.alarmsPlaceholder.beVisibleIf(alarms.isEmpty())
         }
     }
 
@@ -136,7 +178,8 @@ class AlarmFragment : Fragment(), ToggleAlarmInterface {
         (activity as SimpleActivity).handleFullScreenNotificationsPermission { granted ->
             if (granted) {
                 if (requireContext().dbHelper.updateAlarmEnabledState(id, isEnabled)) {
-                    val alarm = alarms.firstOrNull { it.id == id } ?: return@handleFullScreenNotificationsPermission
+                    val alarm = alarms.firstOrNull { it.id == id }
+                        ?: return@handleFullScreenNotificationsPermission
                     alarm.isEnabled = isEnabled
                     checkAlarmState(alarm)
                     if (!alarm.isEnabled && alarm.oneShot) {
@@ -154,12 +197,13 @@ class AlarmFragment : Fragment(), ToggleAlarmInterface {
     }
 
     private fun checkAlarmState(alarm: Alarm) {
+        val activity = activity as? MainActivity ?: return
         if (alarm.isEnabled) {
-            context?.scheduleNextAlarm(alarm, true)
+            activity.alarmController.scheduleNextOccurrence(alarm = alarm, showToasts = true)
         } else {
-            context?.cancelAlarmClock(alarm)
+            activity.cancelAlarmClock(alarm)
         }
-        (activity as? MainActivity)?.updateClockTabAlarm()
+        activity.updateClockTabAlarm()
     }
 
     fun updateAlarmSound(alarmSound: AlarmSound) {
@@ -167,7 +211,7 @@ class AlarmFragment : Fragment(), ToggleAlarmInterface {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: AlarmEvent.Refresh) {
+    fun onMessageEvent(@Suppress("unused") event: AlarmEvent.Refresh) {
         setupAlarms()
     }
 }

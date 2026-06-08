@@ -12,7 +12,7 @@
     <string name="stopwatch_stopped">Секундомер остановлен</string>
     <string name="timer_stopped">Таймер остановлен</string>
     <string name="max_reminder_duration">Максимальная длительность напоминания</string>
-    <string name="time_expired">Время вышло</string>
+    <string name="time_expired">Время истекло</string>
     <string name="clock_and_date">Часы и дата</string>
     <string name="use_text_shadow">Использовать затенение текста</string>
     <string name="swipe_right_to_dismiss">Смахивание вправо — отключить, влево — отложить.</string>
@@ -31,7 +31,6 @@
     <string name="no_timers_found">Таймеры отсутствуют</string>
     <string name="add_timer">Добавить таймер</string>
     <string name="upcoming_alarm">Предстоящий будильник</string>
-    <string name="early_alarm_dismissal">Досрочное отключение будильника</string>
     <string name="timers_notification_msg">Таймеры запущены</string>
     <string name="timer_single_notification_label_msg">Таймер для %s запущен</string>
     <string name="new_timer">Новый таймер</string>
@@ -48,5 +47,12 @@
     <string name="show_seconds">Показывать секунды</string>
     <string name="increase_volume_gradually">Нарастание громкости</string>
     <string name="faq_1_title">Как я могу изменить сортировку кругов во вкладке секундомера?</string>
-    <string name="faq_1_text">Просто нажмите на любую из колонок, и круги отсортируются по этой колонке. Дополнительными нажатиями можно переключаться между сортировкой по возрастанию и по убыванию.</string>
+    <string name="faq_1_text">Просто нажмите на любой из столбцов, и круги отсортируются по этому столбцу. Дополнительными нажатиями можно переключаться между сортировкой по возрастанию и по убыванию.</string>
+    <string name="settings_export_data">Экспорт таймеров и будильников</string>
+    <string name="settings_import_data">Импорт таймеров и будильников</string>
+    <string name="sort_by_timer_duration">Длительность таймера</string>
+    <string name="not_scheduled">Не запланировано</string>
+    <string name="missed_alarm">Пропущенный будильник</string>
+    <string name="replaced_by_another_alarm">Заменён другим будильником</string>
+    <string name="alarm_timed_out">Время действия будильника истекло</string>
 </resources>

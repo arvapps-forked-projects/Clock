@@ -29,12 +29,11 @@
     <string name="no_alarms_found">No se encontraron alarmas</string>
     <string name="no_timers_found">No se encontraron temporizadores</string>
     <string name="upcoming_alarm">Próxima alarma</string>
-    <string name="early_alarm_dismissal">Supresión de la alarma anticipada</string>
     <string name="timers_notification_msg">Los temporizadores están en marcha</string>
     <string name="timer_single_notification_label_msg">El temporizador para %s está en marcha</string>
     <string name="new_timer">Nuevo Temporizador</string>
     <plurals name="timer_notification_msg">
-        <item quantity="one">%d temporizador están funcionando</item>
+        <item quantity="one">%d temporizador está funcionando</item>
         <item quantity="many">%d temporizadores están funcionando</item>
         <item quantity="other">%d temporizadores están funcionando</item>
     </plurals>
@@ -45,7 +44,14 @@
     <string name="show_seconds">Mostrar segundos</string>
     <string name="increase_volume_gradually">Aumentar volumen gradualmente</string>
     <string name="faq_1_title">¿Cómo puedo cambiar el orden de las vueltas en la pestaña de cronómetro?</string>
-    <string name="faq_1_text">Solo toca cualquiera de las columnas, eso hará que las vueltas sean ordenados por la columna seleccionada. Con toques adicionales, puedes cambiar entre ordenar ascendente o descendentemente.</string>
+    <string name="faq_1_text">Solo toca cualquiera de las columnas, eso hará que las vueltas sean ordenados por la columna seleccionada. Con toques adicionales, puedes cambiar entre ordenación ascendente y descendente.</string>
     <string name="add_timer">Añadir un temporizador</string>
     <string name="add_alarm">Añadir una alarma</string>
+    <string name="settings_import_data">Importar alarmas y temporizadores</string>
+    <string name="settings_export_data">Exportar alarmas y temporizadores</string>
+    <string name="sort_by_timer_duration">Duración de temporizador</string>
+    <string name="missed_alarm">Alarma perdida</string>
+    <string name="replaced_by_another_alarm">Sustituida por otra alarma</string>
+    <string name="not_scheduled">No programado</string>
+    <string name="alarm_timed_out">Alarma caducada</string>
 </resources>

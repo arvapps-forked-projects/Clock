@@ -8,6 +8,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.fossify.clock.R
 import org.fossify.clock.activities.SimpleActivity
 import org.fossify.clock.adapters.StopwatchAdapter
@@ -17,18 +21,37 @@ import org.fossify.clock.extensions.formatStopwatchTime
 import org.fossify.clock.helpers.SORT_BY_LAP
 import org.fossify.clock.helpers.SORT_BY_LAP_TIME
 import org.fossify.clock.helpers.SORT_BY_TOTAL_TIME
+import org.fossify.clock.helpers.STOPWATCH_LIVE_LAP_ID
 import org.fossify.clock.helpers.Stopwatch
 import org.fossify.clock.models.Lap
 import org.fossify.commons.dialogs.PermissionRequiredDialog
-import org.fossify.commons.extensions.*
+import org.fossify.commons.extensions.applyColorFilter
+import org.fossify.commons.extensions.beGone
+import org.fossify.commons.extensions.beInvisibleIf
+import org.fossify.commons.extensions.beVisibleIf
+import org.fossify.commons.extensions.flipBit
+import org.fossify.commons.extensions.getColoredBitmap
+import org.fossify.commons.extensions.getColoredDrawableWithColor
+import org.fossify.commons.extensions.getProperBackgroundColor
+import org.fossify.commons.extensions.getProperPrimaryColor
+import org.fossify.commons.extensions.getProperTextColor
+import org.fossify.commons.extensions.openNotificationSettings
+import org.fossify.commons.extensions.updateTextColors
 import org.fossify.commons.helpers.SORT_DESCENDING
 
 class StopwatchFragment : Fragment() {
 
-    lateinit var stopwatchAdapter: StopwatchAdapter
+    private var stopwatchAdapter: StopwatchAdapter? = null
     private lateinit var binding: FragmentStopwatchBinding
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    private var latestLapTime: Long = 0L
+    private var latestTotalTime: Long = 0L
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
         val sorting = requireContext().config.stopwatchLapsSort
         Lap.sorting = sorting
         binding = FragmentStopwatchBinding.inflate(inflater, container, false).apply {
@@ -57,12 +80,16 @@ class StopwatchFragment : Fragment() {
             }
 
             stopwatchLap.setOnClickListener {
-                stopwatchSortingIndicatorsHolder.beVisible()
+                setShowLaps(true)
                 Stopwatch.lap()
                 updateLaps()
+                scrollToTop()
             }
 
-            stopwatchAdapter = StopwatchAdapter(activity as SimpleActivity, ArrayList(), stopwatchList) {
+            stopwatchAdapter = StopwatchAdapter(
+                activity = activity as SimpleActivity,
+                recyclerView = stopwatchList
+            ) {
                 if (it is Int) {
                     changeSorting(it)
                 }
@@ -77,12 +104,13 @@ class StopwatchFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         setupViews()
-
         Stopwatch.addUpdateListener(updateListener)
         updateLaps()
-        binding.stopwatchSortingIndicatorsHolder.beVisibleIf(Stopwatch.laps.isNotEmpty())
         if (Stopwatch.laps.isNotEmpty()) {
             updateSorting(Lap.sorting)
+            setShowLaps(true)
+        } else {
+            setShowLaps(false)
         }
 
         if (requireContext().config.toggleStopwatch) {
@@ -98,24 +126,52 @@ class StopwatchFragment : Fragment() {
 
     private fun setupViews() {
         val properPrimaryColor = requireContext().getProperPrimaryColor()
+        val properTextColor = requireContext().getProperTextColor()
         binding.apply {
             requireContext().updateTextColors(stopwatchFragment)
-            stopwatchPlayPause.background = resources.getColoredDrawableWithColor(R.drawable.circle_background_filled, properPrimaryColor)
-            stopwatchReset.applyColorFilter(requireContext().getProperTextColor())
+            stopwatchTime.setTextColor(properTextColor)
+            stopwatchPlayPause.background = resources.getColoredDrawableWithColor(
+                drawableId = R.drawable.circle_background_filled,
+                color = properPrimaryColor
+            )
+            stopwatchReset.applyColorFilter(properTextColor)
+            stopwatchLap.applyColorFilter(properTextColor)
+        }
+
+        stopwatchAdapter?.apply {
+            updatePrimaryColor()
+            updateBackgroundColor(requireContext().getProperBackgroundColor())
+            updateTextColor(properTextColor)
         }
     }
 
     private fun updateIcons(state: Stopwatch.State) {
         val drawableId =
-            if (state == Stopwatch.State.RUNNING) org.fossify.commons.R.drawable.ic_pause_vector else org.fossify.commons.R.drawable.ic_play_vector
-        val iconColor = if (requireContext().getProperPrimaryColor() == Color.WHITE) Color.BLACK else Color.WHITE
-        binding.stopwatchPlayPause.setImageDrawable(resources.getColoredDrawableWithColor(drawableId, iconColor))
+            if (state == Stopwatch.State.RUNNING) {
+                org.fossify.commons.R.drawable.ic_pause_vector
+            } else {
+                org.fossify.commons.R.drawable.ic_play_vector
+            }
+
+        val iconColor =
+            if (requireContext().getProperPrimaryColor() == Color.WHITE) {
+                Color.BLACK
+            } else {
+                Color.WHITE
+            }
+
+        binding.stopwatchPlayPause.setImageDrawable(
+            resources.getColoredDrawableWithColor(
+                drawableId = drawableId,
+                color = iconColor
+            )
+        )
     }
 
     private fun togglePlayPause() {
         (activity as SimpleActivity).handleNotificationPermission { granted ->
             if (granted) {
-                Stopwatch.toggle(true)
+                Stopwatch.toggle()
             } else {
                 PermissionRequiredDialog(
                     activity as SimpleActivity,
@@ -125,22 +181,17 @@ class StopwatchFragment : Fragment() {
         }
     }
 
-    private fun updateDisplayedText(totalTime: Long, lapTime: Long, useLongerMSFormat: Boolean) {
-        binding.stopwatchTime.text = totalTime.formatStopwatchTime(useLongerMSFormat)
-        if (Stopwatch.laps.isNotEmpty() && lapTime != -1L) {
-            stopwatchAdapter.updateLastField(lapTime, totalTime)
-        }
-    }
-
     private fun resetStopwatch() {
         Stopwatch.reset()
+        latestLapTime = 0L
+        latestTotalTime = 0L
 
         updateLaps()
         binding.apply {
             stopwatchReset.beGone()
             stopwatchLap.beGone()
             stopwatchTime.text = 0L.formatStopwatchTime(false)
-            stopwatchSortingIndicatorsHolder.beInvisible()
+            setShowLaps(false)
         }
     }
 
@@ -151,6 +202,7 @@ class StopwatchFragment : Fragment() {
             clickedValue or SORT_DESCENDING
         }
         updateSorting(sorting)
+        scrollToTop()
     }
 
     private fun updateSorting(sorting: Int) {
@@ -161,7 +213,10 @@ class StopwatchFragment : Fragment() {
     }
 
     private fun updateSortingIndicators(sorting: Int) {
-        var bitmap = requireContext().resources.getColoredBitmap(R.drawable.ic_sorting_triangle_vector, requireContext().getProperPrimaryColor())
+        var bitmap = requireContext().resources.getColoredBitmap(
+            resourceId = R.drawable.ic_sorting_triangle_vector,
+            newColor = requireContext().getProperPrimaryColor()
+        )
         binding.apply {
             stopwatchSortingIndicator1.beInvisibleIf(sorting and SORT_BY_LAP == 0)
             stopwatchSortingIndicator2.beInvisibleIf(sorting and SORT_BY_LAP_TIME == 0)
@@ -176,7 +231,8 @@ class StopwatchFragment : Fragment() {
             if (sorting and SORT_DESCENDING == 0) {
                 val matrix = Matrix()
                 matrix.postScale(1f, -1f)
-                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                bitmap =
+                    Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
             }
             activeIndicator.setImageBitmap(bitmap)
         }
@@ -188,28 +244,48 @@ class StopwatchFragment : Fragment() {
         }
     }
 
-    private fun updateLaps() {
-        stopwatchAdapter.apply {
-            updatePrimaryColor()
-            updateBackgroundColor(requireContext().getProperBackgroundColor())
-            updateTextColor(requireContext().getProperTextColor())
-            updateItems(Stopwatch.laps)
+    private fun updateLaps() = viewLifecycleOwner.lifecycleScope.launch {
+        stopwatchAdapter?.submitList(
+            withContext(Dispatchers.Default) {
+                val laps = ArrayList(Stopwatch.laps)
+                if (laps.isNotEmpty() && Stopwatch.state != Stopwatch.State.STOPPED) {
+                    laps += Lap(
+                        id = STOPWATCH_LIVE_LAP_ID,
+                        lapTime = latestLapTime,
+                        totalTime = latestTotalTime
+                    )
+                }
+                laps.sort()
+                laps
+            }
+        )
+    }
+
+    private fun scrollToTop() {
+        binding.stopwatchList.post {
+            binding.stopwatchList.scrollToPosition(0)
         }
+    }
+
+    private fun setShowLaps(showLaps: Boolean) {
+        binding.stopwatchSortingIndicatorsHolder.beVisibleIf(showLaps)
+        binding.stopwatchList.beVisibleIf(showLaps)
     }
 
     private val updateListener = object : Stopwatch.UpdateListener {
         override fun onUpdate(totalTime: Long, lapTime: Long, useLongerMSFormat: Boolean) {
-            activity?.runOnUiThread {
-                updateDisplayedText(totalTime, lapTime, useLongerMSFormat)
-            }
+            binding.stopwatchTime.text = totalTime.formatStopwatchTime(useLongerMSFormat)
+            latestLapTime = lapTime
+            latestTotalTime = totalTime
+            // We just update the list everytime for simplicity.
+            // dafa9e0ad88fdf77c19b91caec0683a3a87b8f50 would be more efficient.
+            updateLaps()
         }
 
         override fun onStateChanged(state: Stopwatch.State) {
-            activity?.runOnUiThread {
-                updateIcons(state)
-                binding.stopwatchLap.beVisibleIf(state == Stopwatch.State.RUNNING)
-                binding.stopwatchReset.beVisibleIf(state != Stopwatch.State.STOPPED)
-            }
+            updateIcons(state)
+            binding.stopwatchLap.beVisibleIf(state == Stopwatch.State.RUNNING)
+            binding.stopwatchReset.beVisibleIf(state != Stopwatch.State.STOPPED)
         }
     }
 }

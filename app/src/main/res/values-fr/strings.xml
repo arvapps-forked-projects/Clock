@@ -31,7 +31,6 @@
     <string name="no_timers_found">Aucun minuteur n\'a été trouvé</string>
     <string name="add_timer">Ajouter un minuteur</string>
     <string name="upcoming_alarm">Alarme à venir</string>
-    <string name="early_alarm_dismissal">Rejet d\'alarme précoce</string>
     <string name="timers_notification_msg">Les minuteurs sont en cours d\'exécution</string>
     <string name="timer_single_notification_label_msg">Le minuteur pour %s est en cours d\'exécution</string>
     <string name="new_timer">Nouveau minuteur</string>
@@ -48,4 +47,11 @@
     <string name="increase_volume_gradually">Augmenter progressivement le volume</string>
     <string name="faq_1_title">Comment puis-je modifier le tri des tours dans l\'onglet chronomètre \?</string>
     <string name="faq_1_text">Cliquez simplement sur l’une des colonnes afin de trier les tours selon la colonne donnée. Par des clics supplémentaires, vous basculerez entre les tris croissant et décroissant.</string>
+    <string name="sort_by_timer_duration">Durée du timer</string>
+    <string name="settings_export_data">Exporter des alarmes et des timers</string>
+    <string name="settings_import_data">Importer des alarmes et des timers</string>
+    <string name="not_scheduled">Non programmé</string>
+    <string name="replaced_by_another_alarm">Remplacée par une autre alarme</string>
+    <string name="missed_alarm">Alarme manquée</string>
+    <string name="alarm_timed_out">Alarme expirée</string>
 </resources>

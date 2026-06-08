@@ -1,12 +1,13 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.konan.properties.Properties
 import java.io.FileInputStream
 
 plugins {
     alias(libs.plugins.android)
-    alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.detekt)
 }
 
 val keystorePropertiesFile: File = rootProject.file("keystore.properties")
@@ -15,16 +16,27 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+fun hasSigningVars(): Boolean {
+    return providers.environmentVariable("SIGNING_KEY_ALIAS").orNull != null
+            && providers.environmentVariable("SIGNING_KEY_PASSWORD").orNull != null
+            && providers.environmentVariable("SIGNING_STORE_FILE").orNull != null
+            && providers.environmentVariable("SIGNING_STORE_PASSWORD").orNull != null
+}
+
+base {
+    val versionCode = project.property("VERSION_CODE").toString().toInt()
+    archivesName = "clock-$versionCode"
+}
+
 android {
     compileSdk = project.libs.versions.app.build.compileSDKVersion.get().toInt()
 
     defaultConfig {
-        applicationId = libs.versions.app.version.appId.get()
+        applicationId = project.property("APP_ID").toString()
         minSdk = project.libs.versions.app.build.minimumSDK.get().toInt()
         targetSdk = project.libs.versions.app.build.targetSDK.get().toInt()
-        versionName = project.libs.versions.app.version.versionName.get()
-        versionCode = project.libs.versions.app.version.versionCode.get().toInt()
-        archivesName.set("clock-$versionCode")
+        versionName = project.property("VERSION_NAME").toString()
+        versionCode = project.property("VERSION_CODE").toString().toInt()
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
@@ -38,6 +50,15 @@ android {
                 storeFile = file(keystoreProperties.getProperty("storeFile"))
                 storePassword = keystoreProperties.getProperty("storePassword")
             }
+        } else if (hasSigningVars()) {
+            register("release") {
+                keyAlias = providers.environmentVariable("SIGNING_KEY_ALIAS").get()
+                keyPassword = providers.environmentVariable("SIGNING_KEY_PASSWORD").get()
+                storeFile = file(providers.environmentVariable("SIGNING_STORE_FILE").get())
+                storePassword = providers.environmentVariable("SIGNING_STORE_PASSWORD").get()
+            }
+        } else {
+            logger.warn("Warning: No signing config found. Build will be unsigned.")
         }
     }
 
@@ -56,7 +77,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            if (keystorePropertiesFile.exists()) {
+            if (keystorePropertiesFile.exists() || hasSigningVars()) {
                 signingConfig = signingConfigs.getByName("release")
             }
         }
@@ -66,15 +87,16 @@ android {
     productFlavors {
         register("core")
         register("foss")
-        register("prepaid")
+        register("gplay")
     }
 
     sourceSets {
-        getByName("main").java.srcDirs("src/main/kotlin")
+        getByName("main").java.directories.add("src/main/kotlin")
     }
 
     compileOptions {
-        val currentJavaVersionFromLibs = JavaVersion.valueOf(libs.versions.app.build.javaVersion.get())
+        val currentJavaVersionFromLibs =
+            JavaVersion.valueOf(libs.versions.app.build.javaVersion.get())
         sourceCompatibility = currentJavaVersionFromLibs
         targetCompatibility = currentJavaVersionFromLibs
     }
@@ -83,16 +105,39 @@ android {
         includeInApk = false
     }
 
-    tasks.withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = project.libs.versions.app.build.kotlinJVMTarget.get()
+    androidResources {
+        @Suppress("UnstableApiUsage")
+        generateLocaleConfig = true
     }
 
-    namespace = libs.versions.app.version.appId.get()
+    tasks.withType<KotlinCompile> {
+        compilerOptions.jvmTarget.set(
+            JvmTarget.fromTarget(project.libs.versions.app.build.kotlinJVMTarget.get())
+        )
+    }
+
+    namespace = project.property("APP_ID").toString()
 
     lint {
         checkReleaseBuilds = false
-        abortOnError = false
+        abortOnError = true
+        warningsAsErrors = false
+        baseline = file("lint-baseline.xml")
+        lintConfig = rootProject.file("lint.xml")
     }
+
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+}
+
+detekt {
+    baseline = file("detekt-baseline.xml")
+    config.setFrom("$rootDir/detekt.yml")
+    buildUponDefaultConfig = true
+    allRules = false
 }
 
 dependencies {
@@ -101,13 +146,13 @@ dependencies {
     implementation(libs.bundles.lifecycle)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.preference)
-    implementation(libs.androidx.work)
     implementation(libs.kotlinx.coroutines)
-    implementation(libs.stetho)
     implementation(libs.numberpicker)
     implementation(libs.autofittextview)
     implementation(libs.eventbus)
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.bundles.room)
     ksp(libs.androidx.room.compiler)
+    detektPlugins(libs.compose.detekt)
 }

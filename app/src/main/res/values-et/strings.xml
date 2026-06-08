@@ -14,7 +14,7 @@
     <string name="time_expired">Aeg on läbi</string>
     <string name="clock_and_date">Kell ja kuupäev</string>
     <string name="use_text_shadow">Kasuta tekstivarju</string>
-    <string name="swipe_right_to_dismiss">Katkestamiseks viipa paremale, uinumiseks viipa vasakule.</string>
+    <string name="swipe_right_to_dismiss">Lõpetamiseks viipa paremale, uinumiseks viipa vasakule.</string>
     <string name="sort_by_creation_order">Loomise järjekord</string>
     <string name="sort_by_alarm_time">Äratuse aeg</string>
     <string name="sort_by_day_and_alarm_time">Päev ja äratuse aeg</string>
@@ -30,9 +30,8 @@
     <string name="no_timers_found">Taimereid ei leidu</string>
     <string name="add_timer">Lisa taimer</string>
     <string name="upcoming_alarm">Järgmine äratus</string>
-    <string name="early_alarm_dismissal">Lõpeta äratus enneaegselt</string>
     <string name="timers_notification_msg">Taimerid töötavad</string>
-    <string name="timer_single_notification_label_msg">%s taimer töötab</string>
+    <string name="timer_single_notification_label_msg">Taimer töötab: %s</string>
     <string name="new_timer">Uus taimer</string>
     <plurals name="timer_notification_msg">
         <item quantity="one">%d taimer töötab</item>
@@ -47,4 +46,11 @@
     <string name="faq_1_title">Kuidas ma saan stopperis muuta ringiaegade sortimist\?</string>
     <string name="faq_1_text">Klõpsi veerul ja sellega määrad, et sortimine toimub selle veeru alusel. Mitme klõpsuga saad vahetada, kas sortimine toimub kasvavas või kahanevas suunas.</string>
     <string name="clock">Kell</string>
+    <string name="settings_export_data">Ekspordi äratusi ja taimereid</string>
+    <string name="settings_import_data">Impordi äratusi ja taimereid</string>
+    <string name="sort_by_timer_duration">Taimeri kestus</string>
+    <string name="alarm_timed_out">Äratus aegus</string>
+    <string name="not_scheduled">Pole ajastatud</string>
+    <string name="missed_alarm">Märkamata äratus</string>
+    <string name="replaced_by_another_alarm">Seda asendas teine äratus</string>
 </resources>
