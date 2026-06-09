@@ -83,7 +83,8 @@ class ImportHelper(
                 alarm.soundTitle == existingAlarm.soundTitle &&
                 alarm.soundUri == existingAlarm.soundUri &&
                 alarm.label == existingAlarm.label &&
-                alarm.oneShot == existingAlarm.oneShot
+                alarm.oneShot == existingAlarm.oneShot &&
+                alarm.dateString == existingAlarm.dateString
             ) {
                 return true
             }

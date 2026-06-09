@@ -198,6 +198,12 @@ class AlarmsAdapter(
     private fun getAlarmSelectedDaysString(
         alarm: Alarm, isEnabled: Boolean = alarm.isEnabled,
     ): String {
+        if (!isEnabled) {
+            return resources.getString(R.string.not_scheduled)
+        }
+        if (alarm.dateString.isNotEmpty()) {
+            return getFormattedDateString(alarm.dateString)
+        }
         if (alarm.isRecurring()) {
             return if (alarm.days == EVERY_DAY_BIT) {
                 activity.getString(org.fossify.commons.R.string.every_day)
@@ -208,9 +214,28 @@ class AlarmsAdapter(
         }
 
         return when {
-            !isEnabled -> resources.getString(R.string.not_scheduled)
             alarm.isToday() -> resources.getString(org.fossify.commons.R.string.today)
             else -> resources.getString(org.fossify.commons.R.string.tomorrow)
+        }
+    }
+
+    private fun getFormattedDateString(dateString: String): String {
+        return try {
+            val parts = dateString.split("-")
+            val year = parts[0].toInt()
+            val month = parts[1].toInt() - 1
+            val day = parts[2].toInt()
+            val cal = java.util.Calendar.getInstance().apply {
+                set(java.util.Calendar.YEAR, year)
+                set(java.util.Calendar.MONTH, month)
+                set(java.util.Calendar.DAY_OF_MONTH, day)
+            }
+            val dayOfWeekIndex = (cal.get(java.util.Calendar.DAY_OF_WEEK) + 5) % 7
+            val dayOfWeek = activity.resources.getStringArray(org.fossify.commons.R.array.week_days_short)[dayOfWeekIndex]
+            val monthString = activity.resources.getStringArray(org.fossify.commons.R.array.months)[month]
+            "$dayOfWeek, $day $monthString"
+        } catch (e: Exception) {
+            dateString
         }
     }
 

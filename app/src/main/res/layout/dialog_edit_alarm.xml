@@ -8,46 +8,180 @@
     <RelativeLayout
         android:id="@+id/edit_alarm_holder"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true">
 
-        <org.fossify.commons.views.MyTextView
-            android:id="@+id/edit_alarm_time"
-            android:layout_width="wrap_content"
+        <RadioGroup
+            android:id="@+id/edit_alarm_type_group"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_marginStart="@dimen/activity_margin"
+            android:layout_marginEnd="@dimen/activity_margin"
             android:layout_marginTop="@dimen/activity_margin"
-            android:background="?attr/selectableItemBackground"
-            android:fontFeatureSettings="tnum"
-            android:includeFontPadding="false"
-            android:padding="@dimen/tiny_margin"
-            android:textSize="@dimen/alarm_text_size"
-            tools:text="07:00" />
+            android:gravity="center"
+            android:visibility="gone"
+            tools:visibility="visible">
 
-        <org.fossify.commons.views.MyTextView
-            android:id="@+id/edit_alarm_dayless_label"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignBaseline="@+id/edit_alarm_time"
-            android:layout_marginStart="@dimen/normal_margin"
-            android:layout_toEndOf="@+id/edit_alarm_time"
-            android:textSize="@dimen/big_text_size"
-            tools:text="@string/tomorrow" />
+            <org.fossify.commons.views.MyCompatRadioButton
+                android:id="@+id/edit_alarm_type_regular"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Regular"
+                android:layout_marginEnd="16dp" />
+
+            <org.fossify.commons.views.MyCompatRadioButton
+                android:id="@+id/edit_alarm_type_flocareer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="flocareeer"
+                android:layout_marginEnd="16dp" />
+
+            <org.fossify.commons.views.MyCompatRadioButton
+                android:id="@+id/edit_alarm_type_disabled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Disabled"
+                android:enabled="false" />
+        </RadioGroup>
 
         <LinearLayout
-            android:id="@+id/edit_alarm_days_holder"
+            android:id="@+id/edit_alarm_regular_holder"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/alarm_day_size"
-            android:layout_below="@+id/edit_alarm_time"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@id/edit_alarm_type_group">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/edit_alarm_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/activity_margin"
+                    android:layout_marginTop="@dimen/activity_margin"
+                    android:background="?attr/selectableItemBackground"
+                    android:fontFeatureSettings="tnum"
+                    android:includeFontPadding="false"
+                    android:padding="@dimen/tiny_margin"
+                    android:textSize="@dimen/alarm_text_size"
+                    tools:text="07:00" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/edit_alarm_dayless_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignBaseline="@+id/edit_alarm_time"
+                    android:layout_marginStart="@dimen/normal_margin"
+                    android:layout_toEndOf="@+id/edit_alarm_time"
+                    android:textSize="@dimen/big_text_size"
+                    tools:text="@string/tomorrow" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/edit_alarm_days_holder"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/alarm_day_size"
+                android:layout_marginStart="@dimen/activity_margin"
+                android:layout_marginTop="@dimen/medium_margin"
+                android:layout_marginBottom="@dimen/medium_margin"
+                android:orientation="horizontal" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/edit_alarm_flocareer_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@id/edit_alarm_regular_holder"
+            android:visibility="gone"
             android:layout_marginStart="@dimen/activity_margin"
-            android:layout_marginTop="@dimen/medium_margin"
-            android:layout_marginBottom="@dimen/medium_margin"
-            android:orientation="horizontal" />
+            android:layout_marginEnd="@dimen/activity_margin"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp">
+
+            <org.fossify.commons.views.MyTextView
+                android:id="@+id/edit_alarm_flocareer_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select Flocareer Times (6 AM - 6 PM)"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:id="@+id/edit_alarm_flocareer_times_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/edit_alarm_date_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/edit_alarm_flocareer_holder"
+            android:background="?attr/selectableItemBackground"
+            android:paddingStart="@dimen/activity_margin"
+            android:paddingTop="@dimen/medium_margin"
+            android:paddingEnd="@dimen/activity_margin"
+            android:paddingBottom="@dimen/medium_margin"
+            android:textSize="@dimen/bigger_text_size">
+
+            <ImageView
+                android:id="@+id/edit_alarm_date_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_calendar_vector" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_toEndOf="@+id/edit_alarm_date_icon"
+                android:layout_toStartOf="@+id/edit_alarm_date_clear"
+                android:layout_marginStart="16dp"
+                android:layout_centerVertical="true">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/edit_alarm_date_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Schedule for specific date"
+                    android:textSize="16sp" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/edit_alarm_date_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Not scheduled"
+                    android:textSize="12sp"
+                    android:textColor="#888888" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/edit_alarm_date_clear"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:padding="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_cross_vector"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/edit_alarm_vibrate_holder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/edit_alarm_days_holder"
+            android:layout_below="@+id/edit_alarm_date_holder"
             android:background="?attr/selectableItemBackground"
             android:paddingStart="@dimen/activity_margin"
             android:paddingTop="@dimen/medium_margin"

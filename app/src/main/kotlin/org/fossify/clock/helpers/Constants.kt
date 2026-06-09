@@ -274,6 +274,27 @@ fun getAllTimeZones() = arrayListOf(
 )
 
 fun getTimeOfNextAlarm(alarm: Alarm): Calendar? {
+    if (alarm.dateString.isNotEmpty()) {
+        try {
+            val parts = alarm.dateString.split("-")
+            val year = parts[0].toInt()
+            val month = parts[1].toInt() - 1
+            val day = parts[2].toInt()
+            val targetTime = Calendar.getInstance().apply {
+                set(Calendar.YEAR, year)
+                set(Calendar.MONTH, month)
+                set(Calendar.DAY_OF_MONTH, day)
+                set(Calendar.HOUR_OF_DAY, alarm.timeInMinutes / 60)
+                set(Calendar.MINUTE, alarm.timeInMinutes % 60)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val now = Calendar.getInstance()
+            return if (targetTime > now) targetTime else null
+        } catch (e: Exception) {
+            // fallback
+        }
+    }
     return getTimeOfNextAlarm(alarm.timeInMinutes, alarm.days)
 }
 

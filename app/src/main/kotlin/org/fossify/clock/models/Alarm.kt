@@ -16,8 +16,9 @@ data class Alarm(
     var soundUri: String,
     var label: String,
     var oneShot: Boolean = false,
+    var dateString: String = "",
 ) {
-    fun isRecurring() = days > 0
+    fun isRecurring() = days > 0 && dateString.isEmpty()
 
     fun isToday() = days == TODAY_BIT
 
@@ -35,6 +36,7 @@ data class ObfuscatedAlarm(
     var g: String,
     var h: String,
     var i: Boolean = false,
+    var j: String = "",
 ) {
-    fun toAlarm() = Alarm(a, b, c, d, e, f, g, h, i)
+    fun toAlarm() = Alarm(a, b, c, d, e, f, g, h, i, j)
 }

@@ -194,7 +194,13 @@ class AlarmController(
     }
 
     private fun scheduleNextAlarm(alarm: Alarm, showToast: Boolean = false) {
-        val triggerTimeMillis = getTimeOfNextAlarm(alarm)?.timeInMillis ?: return
+        var triggerTimeMillis = getTimeOfNextAlarm(alarm)?.timeInMillis
+        if (triggerTimeMillis == null && alarm.dateString.isNotEmpty()) {
+            alarm.dateString = ""
+            db.updateAlarm(alarm)
+            triggerTimeMillis = getTimeOfNextAlarm(alarm)?.timeInMillis
+        }
+        if (triggerTimeMillis == null) return
         context.setupAlarmClock(alarm = alarm, triggerTimeMillis = triggerTimeMillis)
 
         if (showToast) {
